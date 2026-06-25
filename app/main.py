@@ -4,12 +4,17 @@ from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from . import config, graph, monitor, observability
 
 _basic = HTTPBasic(auto_error=False)
+
+# Rutas de "ruido" que no aportan al monitor: el healthcheck interno de Docker
+# (cada 30 s) y el favicon que pide el navegador solo. Se omiten del anillo y del
+# log salvo que devuelvan error (así un healthcheck caído sí se vería).
+_QUIET_PATHS = {"/health", "/favicon.ico"}
 
 observability.setup_logging()
 
@@ -43,16 +48,19 @@ async def log_requests(request: Request, call_next):
     if error:
         event["error"] = error
 
-    observability.record(event)
-    log = observability.logger.warning if response.status_code >= 400 else observability.logger.info
-    log(
-        "%s %s -> %s (%sms)%s",
-        request.method,
-        request.url.path,
-        response.status_code,
-        duration_ms,
-        f" ERROR={error}" if error else "",
-    )
+    # Omitir el ruido de healthcheck/favicon salvo que haya error.
+    quiet = request.url.path in _QUIET_PATHS and response.status_code < 400
+    if not quiet:
+        observability.record(event)
+        log = observability.logger.warning if response.status_code >= 400 else observability.logger.info
+        log(
+            "%s %s -> %s (%sms)%s",
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+            f" ERROR={error}" if error else "",
+        )
     return response
 
 
@@ -66,6 +74,18 @@ def _parse(graph_dt: dict) -> dt.datetime:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    # La raíz no sirve datos; lleva al panel de monitoreo.
+    return RedirectResponse(url="/monitor")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    # Evita el 404 que genera el navegador al pedir el icono.
+    return Response(status_code=204)
 
 
 @app.get("/monitor", response_class=HTMLResponse)
