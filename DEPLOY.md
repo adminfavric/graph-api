@@ -135,3 +135,19 @@ curl "https://graph-api.favric.cl/debug/recent?token=algo-secreto"
 
 Sin `DEBUG_TOKEN` (o con token incorrecto) el endpoint responde 404, así que no
 expone nada por defecto. Los logs viejos se borran solos; no llenan el disco.
+
+### Panel web `/monitor`
+
+Hay un panel visual en `https://graph-api.favric.cl/monitor` con login por
+contraseña (diálogo del navegador). Para activarlo, define la clave en el `.env`:
+
+```bash
+# .env
+MONITOR_USER=admin
+MONITOR_PASSWORD=pon-aqui-una-clave-fuerte
+```
+
+Luego `docker compose up -d`. Entra en el navegador a
+`https://graph-api.favric.cl/monitor`, usuario `admin` y la clave que pusiste.
+El panel se refresca solo cada 10 s y muestra las últimas consultas, errores y
+duración. Sin `MONITOR_PASSWORD` el panel queda deshabilitado (404).

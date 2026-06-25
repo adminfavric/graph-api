@@ -2,10 +2,14 @@ import datetime as dt
 import time
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from . import config, graph, observability
+from . import config, graph, monitor, observability
+
+_basic = HTTPBasic(auto_error=False)
 
 observability.setup_logging()
 
@@ -62,6 +66,13 @@ def _parse(graph_dt: dict) -> dt.datetime:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/monitor", response_class=HTMLResponse)
+async def monitor_page(credentials: HTTPBasicCredentials = Depends(_basic)):
+    """Panel web con las últimas consultas y errores. Login por HTTP Basic Auth."""
+    monitor.check_auth(credentials)
+    return HTMLResponse(monitor.render_html())
 
 
 @app.get("/debug/recent")

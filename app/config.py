@@ -21,6 +21,12 @@ RECENT_BUFFER_SIZE = int(os.environ.get("RECENT_BUFFER_SIZE", "200"))
 # Token para proteger /debug/recent. Si está vacío, el endpoint queda deshabilitado (404).
 DEBUG_TOKEN = os.environ.get("DEBUG_TOKEN", "")
 
+# --- Panel web /monitor ---
+# Usuario y clave para entrar al panel web (HTTP Basic Auth).
+# Si MONITOR_PASSWORD está vacío, el panel queda deshabilitado (404).
+MONITOR_USER = os.environ.get("MONITOR_USER", "admin")
+MONITOR_PASSWORD = os.environ.get("MONITOR_PASSWORD", "")
+
 AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 SCOPE = ["https://graph.microsoft.com/.default"]
 GRAPH_BASE = "https://graph.microsoft.com/v1.0"
