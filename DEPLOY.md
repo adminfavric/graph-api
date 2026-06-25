@@ -4,7 +4,9 @@ Guía paso a paso para levantar el backend FastAPI en el VPS con Docker Compose
 detrás de Nginx con TLS (Let's Encrypt).
 
 > DNS: `graph-api.favric.cl` ya apunta a la IP del VPS (hecho).
-> El contenedor escucha **solo** en `127.0.0.1:8000`; Nginx es el único expuesto.
+> El contenedor escucha **solo** en `127.0.0.1:8011`; Nginx es el único expuesto.
+> (Puerto host 8011 porque el 8000 ya lo usa `ms-catalogue-web-1` en este VPS;
+> el puerto interno del contenedor sigue siendo 8000.)
 
 ---
 
@@ -57,8 +59,8 @@ docker compose ps          # debe verse "healthy" tras ~15 s
 docker compose logs -f     # Ctrl-C para salir
 
 # Probar localmente (dentro del VPS):
-curl http://127.0.0.1:8000/health     # {"status":"ok"}
-curl http://127.0.0.1:8000/agenda     # JSON real de la sala
+curl http://127.0.0.1:8011/health     # {"status":"ok"}
+curl http://127.0.0.1:8011/agenda     # JSON real de la sala
 ```
 
 Si `/agenda` devuelve 502, revisar credenciales del `.env` y que el admin haya

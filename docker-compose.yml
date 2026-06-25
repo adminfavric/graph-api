@@ -7,8 +7,11 @@ services:
     env_file:
       - .env
     # Solo escucha en localhost del VPS; Nginx hace de reverse proxy con TLS.
+    # Puerto host 8011 (el 8000 ya lo usa ms-catalogue-web-1 en este VPS).
+    # Interno sigue siendo 8000 (uvicorn). Si cambias el host port, actualiza
+    # también deploy/nginx-graph-api.favric.cl.conf (proxy_pass).
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8011:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/health').status==200 else sys.exit(1)\""]
       interval: 30s
