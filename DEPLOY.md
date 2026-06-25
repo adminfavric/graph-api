@@ -112,3 +112,26 @@ Esta es la URL que ya viene compilada dentro de la APK
 
 > El token de Microsoft Graph se renueva solo (MSAL lo cachea en memoria); no hay
 > que reiniciar el contenedor para refrescarlo.
+
+## Logs y monitoreo
+
+Cada petición y error queda registrado. Hay dos formas de verlo:
+
+```bash
+# 1. Archivo persistente (rota a diario, conserva LOG_RETENTION_DAYS=3 días)
+tail -f /opt/graph-api/logs/agenda.log
+
+# 2. En vivo desde el contenedor
+docker compose logs -f
+```
+
+Endpoint opcional con las últimas consultas/errores en JSON (útil para depurar
+sin entrar por SSH). Se activa poniendo un `DEBUG_TOKEN` en el `.env`:
+
+```bash
+# .env  →  DEBUG_TOKEN=algo-secreto   (luego: docker compose up -d)
+curl "https://graph-api.favric.cl/debug/recent?token=algo-secreto"
+```
+
+Sin `DEBUG_TOKEN` (o con token incorrecto) el endpoint responde 404, así que no
+expone nada por defecto. Los logs viejos se borran solos; no llenan el disco.

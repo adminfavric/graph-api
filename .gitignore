@@ -1,6 +1,9 @@
 # Credenciales — NUNCA commitear
 .env
 
+# Logs generados en runtime
+logs/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -6,6 +6,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    # Logs persistentes en el host (./logs). Rotan a diario y se conservan
+    # LOG_RETENTION_DAYS (3 por defecto); los más viejos se borran solos.
+    volumes:
+      - ./logs:/app/logs
     # Solo escucha en localhost del VPS; Nginx hace de reverse proxy con TLS.
     # Puerto host 8011 (el 8000 ya lo usa ms-catalogue-web-1 en este VPS).
     # Interno sigue siendo 8000 (uvicorn). Si cambias el host port, actualiza
