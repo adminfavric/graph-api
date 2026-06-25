@@ -1,0 +1,17 @@
+services:
+  agenda-api:
+    build: .
+    image: tabletroom-agenda:latest
+    container_name: tabletroom-agenda
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Solo escucha en localhost del VPS; Nginx hace de reverse proxy con TLS.
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/health').status==200 else sys.exit(1)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
